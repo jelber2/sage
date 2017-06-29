@@ -3,7 +3,7 @@
 ###############################################################################
 # "convert_SAGE_FASTQ_to_RNA_count_table.sh"
 # created by: Jean P. Elbers
-# last modified: 29 June 2017, 8:30h
+# last modified: 29 June 2017, 9:06h
 ###############################################################################
 # Description
 #
@@ -111,7 +111,7 @@
 #    # R:\solid\GCF\solidsageReferences\mm10\GRCm38.p1\VirtualReference\GRCm38.p1-mRNA-CATG-28\28.unique.all.virtual.tags.rec
 #    ~/bin/usearch -makeudb_usearch 28.unique.all.virtual.tags.rec -output SAGE28_ref.udb
 # G.Barcode file format
-#     #note salbaum-barcodes.txt is in this format (minus the # and four leading spaces)
+#    #note salbaum-barcodes.txt is in this format (minus the # and four leading spaces)
 #    CA N61M36BP70.fq
 #    CT N61M36CP70.fq
 #    CG N61M36DP70.fq
@@ -133,12 +133,12 @@ then
     echo 'You need to provide a config file'
     echo ''
     echo 'For example:'
-    echo 'convert_SAGE_FASTQ_to_RNA_count_table.sh config.txt'
+    echo './convert_SAGE_FASTQ_to_RNA_count_table.sh config.txt'
     echo ''
     exit 1
 else
     echo ''
-    echo "$1 is the config file you want to use"
+    echo "$1 is the config file you specified"
     echo ''
     echo "It's variables are as follows:"
     echo ''
@@ -168,171 +168,201 @@ else
     usearch_config=$(sed -n '13p' $1|perl -pe 's/\t.+//g')
     if [ ! -f $barcodes_config ]
     then
-    echo ''
-    echo ''
-    echo "$barcodes_config does not exist. Fix config file..."
-    echo ''
-    exit 1
+        echo ''
+        echo ''
+        echo "$barcodes_config does not exist. Fix config file..."
+        echo ''
+        exit 1
     fi
     if [ ! -f $rna_ref_config ]
     then
-    echo ''
-    echo ''
-    echo "$rna_ref_config does not exist. Fix config file..."
-    echo ''
-    exit 1
+        echo ''
+        echo ''
+        echo "$rna_ref_config does not exist. Fix config file..."
+        echo ''
+        exit 1
     fi
     if [ ! -f $ncrna_ref_config ]
     then
-    echo ''
-    echo ''
-    echo "$ncrna_ref_config does not exist. Fix config file..."
-    echo ''
-    exit 1
+        echo ''
+        echo ''
+        echo "$ncrna_ref_config does not exist. Fix config file..."
+        echo ''
+        exit 1
     fi
     if [ ! -f $usearch_config ]
     then
-    echo ''
-    echo ''
-    echo "$usearch_config not in specified folder. Fix config file..."
-    echo ''
-    exit 1
+        echo ''
+        echo ''
+        echo "$usearch_config not in specified folder. Fix config file..."
+        echo ''
+        exit 1
     fi
     if [ ! -f $barcodes_config ]
     then
-    echo ''
-    echo ''
-    echo "$barcodes_config does not exist. Fix config file..."
-    echo ''
-    exit 1
+        echo ''
+        echo ''
+        echo "$barcodes_config does not exist. Fix config file..."
+        echo ''
+        exit 1
     fi
     echo ''
     echo ''
     echo 'Are you satisfied with the config file settings?'
     echo 'y or n'
     echo ''
-    read question
-    if [ $question = "y" ]
-    then
-        echo ''
-        echo ''
-        #Step 1
-        echo 'Starting Step 1: Concatenate reads'
-        cat *$fq_gz_config > $cat_fq_config
-        echo "Done with Step 1"
-        echo ''
-        echo ''
-        #Step 2
-        echo 'Starting Step 2: Demultiplex reads'
-        ~/bin/sabre/sabre se -m 0 -f $cat_fq_config -b $barcodes_config -u /dev/null > $demux_config
-        cat $demux_config
-        echo "Done with Step 2"
-        echo ''
-        echo ''
-        #Step 3
-        echo 'Starting Step 3: FASTQ -> FASTA -> reverse complement'
-        ls *.fq | perl -pe "s/.fq//g" > samples
-        ~/bin/parallel-20130922/src/parallel '~/bin/seqtk/seqtk seq -a {} | ~/bin/seqtk/seqtk seq -r > {.}.rc' ::: *$fq_ext_config
-        echo "Done with Step 3"
-        echo ''
-        echo ''
-        #Step 4
-        echo 'Starting Step 4: Get tags starting with CATG followed by 21 to 23 bases'
-       ~/bin/parallel-20130922/src/parallel 'grep -Po "CATG\w{21,23}" {} > {.}.fa.txt && rm {}' ::: *.rc
-        echo "Done with Step 4"
-        echo ''
-        echo ''
-        #Step 5
-        echo 'Starting Step 5: Convert file of tags into FASTA format'
-        while read i;do
-            export LENGTH="$(wc -l < $i.fa.txt)"
-            seq 1 $LENGTH | perl -pe "s/(\d+)/>\1/" > bar
-            awk '{print $0 "\n"}' $i.fa.txt |sed '1s/^/\n/' > test
-            paste -d '\n' bar <(awk 'NR%2==0' test) > tmp && mv tmp $i.fa.txt.fa && rm bar test && rm $i.fa.txt
-        done < samples
-        echo "Done with Step 5"
-        echo ''
-        echo ''
-        #Step 6
-        echo 'Starting Step 6: Dereplicates FASTA file and performs usearch_global on coding and non-coding RNA refereneces'
-        while read i;do
-            $usearch_config -fastx_uniques $i.fa.txt.fa -fastaout $i.derep.fa -sizeout
-            $usearch_config -usearch_global $i.derep.fa -db $rna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.out
-            $usearch_config -usearch_global $i.derep.fa -db $ncrna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.nc.out
-            echo "Done with sample $i"
-            echo ""
-            echo ""
-            echo ""
-        done < samples
-        echo "Done with Step 6"
-        echo ''
-        echo ''
-        #Step 7
-        echo 'Starting Step 7:Process usearch output'
-        echo ''
-        echo 'Processing coding RNA'
-        while read i;do
-            awk -F"\t" '$4 == "25"||$4 == "26"||$4 == "27" {print $1"\t"$2}' $i.usearch.out | \
-            perl -pe "s/\w+ (.+)/\1/" | \
-            perl -pe "s/( )/\/\/\//g" | \
-            awk '{n = split($2, t, "///"); _2 = x
-            split(x, _)
-            for (i = 0; ++i <= n;)
-            _[t[i]]++ || _2 = _2 ? _2 "," t[i] : t[i]
-            $2 = _2
-            }-2' | grep -v "," | perl -pe "s/.+;size=(\d+);/\1/g" |sort -k 2,2 | sed "1i $i\tGene" > $i.usearch.out.count
-        done < samples
-        echo 'Processing non-coding RNA'
-        while read i;do
-            awk -F"\t" '$6 == "25"||$6 == "26"||$6 == "27" {print $1"\t"$4}' $i.usearch.nc.out | \
-            perl -pe "s/( )/\/\/\//g" | \
-            awk '{n = split($2, t, "///"); _2 = x
-            split(x, _)
-            for (i = 0; ++i <= n;)
-            _[t[i]]++ || _2 = _2 ? _2 "," t[i] : t[i]
-            $2 = _2
-            }-2' | grep -v "," | perl -pe "s/.+;size=(\d+);/\1/g" |sort -k 2,2 | sed "1i $i\tGene" > $i.usearch.nc.out.count
-        done < samples
-        echo "Done with Step 7"
-        echo ''
-        #Step 8
-        echo 'Starting Step 8a:Make coding RNA count table'
-        echo "library(plyr)" > make.count.table.R
-        echo "files <-list.files(pattern='usearch.out.count')" >> make.count.table.R
-        echo "rawcounts <- list()" >> make.count.table.R
-        echo "counts <- list()" >> make.count.table.R
-        echo "for (i in 1:length(files)) {rawcounts[[i]] <- read.table(files[i],header=T)}" >> make.count.table.R
-        echo "for (i in 1:length(files)) {counts[[i]] <- ddply(data.frame(rawcounts[i]),'Gene',numcolwise(sum))}" >> make.count.table.R
-        echo "merged.data.frame = Reduce(function(...) merge(..., all=T), counts)" >> make.count.table.R
-        echo "write.table(merged.data.frame, file='$rna_out_config',quote=F,sep='\t',eol='\r\n',na='0',row.names=F,col.names=T)" >> make.count.table.R
-        Rscript make.count.table.R
-        echo ''
-        echo ''
-        echo 'Starting Step 8b:Make non-coding RNA count table'
-        echo "library(plyr)" > make.nc.count.table.R
-        echo "files <-list.files(pattern='.usearch.nc.out.count')" >> make.nc.count.table.R
-        echo "rawcounts <- list()" >> make.nc.count.table.R
-        echo "counts <- list()" >> make.nc.count.table.R
-        echo "for (i in 1:length(files)) {rawcounts[[i]] <- read.table(files[i],header=T)}" >> make.nc.count.table.R
-        echo "for (i in 1:length(files)) {counts[[i]] <- ddply(data.frame(rawcounts[i]),'Gene',numcolwise(sum))}" >> make.nc.count.table.R
-        echo "merged.data.frame = Reduce(function(...) merge(..., all=T), counts)" >> make.nc.count.table.R
-        echo "write.table(merged.data.frame, file='$ncrna_out_config',quote=F,sep='\t',eol='\r\n',na='0',row.names=F,col.names=T)" >> make.nc.count.table.R
-        Rscript make.nc.count.table.R
-        echo "Done with Step 8"
-        echo ''
-        echo ''
-        #Step 9
-        echo "Step 9: Making output folders"
-        mkdir -p fastq && mv *.fq ./fastq/.
-        mkdir -p fasta && mv *.fa ./fasta/.
-        mkdir -p usearch_coding_out && mv *.usearch.out ./usearch_coding_out/. && mv *.usearch.out.count ./usearch_coding_out/.
-        mkdir -p usearch_noncoding_out && mv *.usearch.nc.out ./usearch_noncoding_out/. && mv *usearch.nc.out.count ./usearch_noncoding_out/.
-        echo ''
-        echo 'Done with all steps'
-    else
-        echo ''
-        echo 'Please edit config file'
-        echo ''
-    exit 1
-    fi
+    while read -r question1
+    do
+        if [ $question1 = "y" ]
+        then
+            echo ''
+            echo ''
+            echo 'Do you wish to demultiplex the data?'
+            echo 'y or n'
+            echo ''
+            while read -r question2
+            do
+                if [ $question2 = "y" ]
+                then
+                    echo ''
+                    echo ''
+                    #Step 1
+                    echo 'Starting Step 1: Concatenate reads'
+                    cat *$fq_gz_config > $cat_fq_config
+                    echo "Done with Step 1"
+                    #Step 2
+                    echo 'Starting Step 2: Demultiplex reads'
+                    ~/bin/sabre/sabre se -m 0 -f $cat_fq_config -b $barcodes_config -u /dev/null > $demux_config
+                    cat $demux_config
+                    echo "Done with Step 2"
+                    echo ''
+                    echo ''
+                elif [ $question2 = "n" ]
+                then
+                    echo ''
+                    echo ''
+                    break
+                else
+                    echo ''
+                    echo ''
+                    echo "You didn't enter y or n"
+                    echo ''
+                    echo "Please enter y or n"
+                fi
+            done
+            #Step 3
+            echo 'Starting Step 3: FASTQ -> FASTA -> reverse complement'
+            ls *.fq | perl -pe "s/.fq//g" > samples
+            ~/bin/parallel-20130922/src/parallel '~/bin/seqtk/seqtk seq -a {} | ~/bin/seqtk/seqtk seq -r > {.}.rc' ::: *$fq_ext_config
+            echo "Done with Step 3"
+            echo ''
+            echo ''
+            #Step 4
+            echo 'Starting Step 4: Get tags starting with CATG followed by 21 to 23 bases'
+           ~/bin/parallel-20130922/src/parallel 'grep -Po "CATG\w{21,23}" {} > {.}.fa.txt && rm {}' ::: *.rc
+            echo "Done with Step 4"
+            echo ''
+            echo ''
+            #Step 5
+            echo 'Starting Step 5: Convert file of tags into FASTA format'
+            while read i;do
+                export LENGTH="$(wc -l < $i.fa.txt)"
+                seq 1 $LENGTH | perl -pe "s/(\d+)/>\1/" > bar
+                awk '{print $0 "\n"}' $i.fa.txt |sed '1s/^/\n/' > test
+                paste -d '\n' bar <(awk 'NR%2==0' test) > tmp && mv tmp $i.fa.txt.fa && rm bar test && rm $i.fa.txt
+            done < samples
+            echo "Done with Step 5"
+            echo ''
+            echo ''
+            #Step 6
+            echo 'Starting Step 6: Dereplicates FASTA file and performs usearch_global on coding and non-coding RNA refereneces'
+            while read i;do
+                $usearch_config -fastx_uniques $i.fa.txt.fa -fastaout $i.derep.fa -sizeout
+                $usearch_config -usearch_global $i.derep.fa -db $rna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.out
+                $usearch_config -usearch_global $i.derep.fa -db $ncrna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.nc.out
+                echo "Done with sample $i"
+                echo ""
+                echo ""
+                echo ""
+            done < samples
+            echo "Done with Step 6"
+            echo ''
+            echo ''
+            #Step 7
+            echo 'Starting Step 7:Process usearch output'
+            echo ''
+            echo 'Processing coding RNA'
+            while read i;do
+                awk -F"\t" '$4 == "25"||$4 == "26"||$4 == "27" {print $1"\t"$2}' $i.usearch.out | \
+                perl -pe "s/\w+ (.+)/\1/" | \
+                perl -pe "s/( )/\/\/\//g" | \
+                awk '{n = split($2, t, "///"); _2 = x
+                split(x, _)
+                for (i = 0; ++i <= n;)
+                _[t[i]]++ || _2 = _2 ? _2 "," t[i] : t[i]
+                $2 = _2
+                }-2' | grep -v "," | perl -pe "s/.+;size=(\d+);/\1/g" |sort -k 2,2 | sed "1i $i\tGene" > $i.usearch.out.count
+            done < samples
+            echo 'Processing non-coding RNA'
+            while read i;do
+                awk -F"\t" '$6 == "25"||$6 == "26"||$6 == "27" {print $1"\t"$4}' $i.usearch.nc.out | \
+                perl -pe "s/( )/\/\/\//g" | \
+                awk '{n = split($2, t, "///"); _2 = x
+                split(x, _)
+                for (i = 0; ++i <= n;)
+                _[t[i]]++ || _2 = _2 ? _2 "," t[i] : t[i]
+                $2 = _2
+                }-2' | grep -v "," | perl -pe "s/.+;size=(\d+);/\1/g" |sort -k 2,2 | sed "1i $i\tGene" > $i.usearch.nc.out.count
+            done < samples
+            echo "Done with Step 7"
+            echo ''
+            #Step 8
+            echo 'Starting Step 8a:Make coding RNA count table'
+            echo "library(plyr)" > make.count.table.R
+            echo "files <-list.files(pattern='usearch.out.count')" >> make.count.table.R
+            echo "rawcounts <- list()" >> make.count.table.R
+            echo "counts <- list()" >> make.count.table.R
+            echo "for (i in 1:length(files)) {rawcounts[[i]] <- read.table(files[i],header=T)}" >> make.count.table.R
+            echo "for (i in 1:length(files)) {counts[[i]] <- ddply(data.frame(rawcounts[i]),'Gene',numcolwise(sum))}" >> make.count.table.R
+            echo "merged.data.frame = Reduce(function(...) merge(..., all=T), counts)" >> make.count.table.R
+            echo "write.table(merged.data.frame, file='$rna_out_config',quote=F,sep='\t',eol='\r\n',na='0',row.names=F,col.names=T)" >> make.count.table.R
+            Rscript make.count.table.R
+            echo ''
+            echo ''
+            echo 'Starting Step 8b:Make non-coding RNA count table'
+            echo "library(plyr)" > make.nc.count.table.R
+            echo "files <-list.files(pattern='.usearch.nc.out.count')" >> make.nc.count.table.R
+            echo "rawcounts <- list()" >> make.nc.count.table.R
+            echo "counts <- list()" >> make.nc.count.table.R
+            echo "for (i in 1:length(files)) {rawcounts[[i]] <- read.table(files[i],header=T)}" >> make.nc.count.table.R
+            echo "for (i in 1:length(files)) {counts[[i]] <- ddply(data.frame(rawcounts[i]),'Gene',numcolwise(sum))}" >> make.nc.count.table.R
+            echo "merged.data.frame = Reduce(function(...) merge(..., all=T), counts)" >> make.nc.count.table.R
+            echo "write.table(merged.data.frame, file='$ncrna_out_config',quote=F,sep='\t',eol='\r\n',na='0',row.names=F,col.names=T)" >> make.nc.count.table.R
+            Rscript make.nc.count.table.R
+            echo "Done with Step 8"
+            echo ''
+            echo ''
+            #Step 9
+            echo "Step 9: Remove intermediate files"
+            rm $cat_fq_config
+            rm *.fq  && rm *.fa 
+            rm *.usearch.out && rm *.usearch.out.count
+            rm *.usearch.nc.out && rm *usearch.nc.out.count
+            rm *.R
+            echo ''
+            echo 'Done with all steps'
+            exit 1
+        elif [ $question1 = "n" ]
+        then
+            echo ''
+            echo 'Please edit config file'
+            echo ''
+            exit 1
+        else
+            echo ''
+            echo "You didn't enter y or n"
+            echo ''
+            echo "Please enter y or n"
+        fi
+    done
 fi
