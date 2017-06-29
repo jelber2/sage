@@ -1,7 +1,14 @@
 # sage
 ## script for converting Sage FASTQ files into coding and non-coding RNA count tables
-### To download the newest version enter the following command in a terminal window
+### To download enter the following command in a terminal window
     git clone https://github.com/jelber2/sage.git
+    # this will create a folder called sage in the current directory
+### To update to the newest version,
+### go to the directory housing the script
+    # example:
+    cd /home/jms/sage/
+### Then type the following command
+    git pull origin master
 ### To use, invoke:
     ./convert_SAGE_FASTQ_to_RNA_count_table.sh 
 ### If you get an error such as:
