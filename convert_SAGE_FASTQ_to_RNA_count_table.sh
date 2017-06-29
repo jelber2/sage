@@ -3,7 +3,7 @@
 ###############################################################################
 # "convert_SAGE_FASTQ_to_RNA_count_table.sh"
 # created by: Jean P. Elbers
-# last modified: 29 June 2017, 9:06h
+# last modified: 29 June 2017, 11:46h
 ###############################################################################
 # Description
 #
@@ -30,6 +30,7 @@
 #         raw counts into counts by adding up counts in genes that repeat in 
 #         the table, then merges all count tables- putting zeros where a gene
 #         is missing in one sample, and finally saves the resulting count table
+# Step 9: Remove intermediate files
 # 
 ###############################################################################
 # Prerequisites
@@ -227,9 +228,15 @@ else
                     echo ''
                     echo ''
                     #Step 1
+                    if [ -f $cat_fq_config ]
+                    then
+                        rm $cat_fq_config
+                    fi
                     echo 'Starting Step 1: Concatenate reads'
                     cat *$fq_gz_config > $cat_fq_config
                     echo "Done with Step 1"
+                    echo ''
+                    echo ''
                     #Step 2
                     echo 'Starting Step 2: Demultiplex reads'
                     ~/bin/sabre/sabre se -m 0 -f $cat_fq_config -b $barcodes_config -u /dev/null > $demux_config
@@ -237,6 +244,7 @@ else
                     echo "Done with Step 2"
                     echo ''
                     echo ''
+                    break
                 elif [ $question2 = "n" ]
                 then
                     echo ''
@@ -281,9 +289,9 @@ else
                 $usearch_config -usearch_global $i.derep.fa -db $rna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.out
                 $usearch_config -usearch_global $i.derep.fa -db $ncrna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.nc.out
                 echo "Done with sample $i"
-                echo ""
-                echo ""
-                echo ""
+                echo ''
+                echo ''
+                echo ''
             done < samples
             echo "Done with Step 6"
             echo ''
@@ -345,12 +353,22 @@ else
             #Step 9
             echo "Step 9: Remove intermediate files"
             rm $cat_fq_config
-            rm *.fq  && rm *.fa 
-            rm *.usearch.out && rm *.usearch.out.count
-            rm *.usearch.nc.out && rm *usearch.nc.out.count
-            rm *.R
+            while read i
+            do
+                rm $i$fq_ext_config
+                rm $i.fa.txt.fa
+                rm $i.derep.fa
+                rm $i.usearch.out
+                rm $i.usearch.out.count
+                rm $i.usearch.nc.out
+                rm $i.usearch.nc.out.count
+            done < samples
+            rm make.count.table.R
+            rm make.nc.count.table.R
+            rm samples
             echo ''
             echo 'Done with all steps'
+            echo ''
             exit 1
         elif [ $question1 = "n" ]
         then
