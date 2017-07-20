@@ -66,6 +66,7 @@
 #    cd ..
 #    make
 #    # commit/version is 039a55e500ba07b7e6432ea6ec2ddcfb3471d949
+#
 # D.Get and install Parallel
 #    cd ~/bin/
 #    wget http://ftp.gnu.org/gnu/parallel/parallel-20130922.tar.bz2
@@ -111,7 +112,30 @@
 #    # coding RNA reference
 #    # R:\solid\GCF\solidsageReferences\mm10\GRCm38.p1\VirtualReference\GRCm38.p1-mRNA-CATG-28\28.unique.all.virtual.tags.rec
 #    ~/bin/usearch -makeudb_usearch 28.unique.all.virtual.tags.rec -output SAGE28_ref.udb
-# G.Barcode file format
+#
+#    # note that you can update the virtual reference, following these steps (the old virtual reference was 
+#    # mm10/GRCm38.p1, newest version is mm10/GRCm38.p5
+#
+#    wget ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/635/GCF_000001635.25_GRCm38.p5/GCF_000001635.25_GRCm38.p5_rna.fna.gz
+#    gunzip GCF_000001635.25_GRCm38.p5_rna.fna.gz
+#
+#    # run these 3 lines together
+#    perl -pne "s/>(\w+_\d+\.\d+) (.+)/print'>gi|'; print int(rand 999999999); print'|ref|';print $1;/ge" GCF_000001635.25_GRCm38.p5_rna.fna | \
+#    grep -Pv "^1" | \
+#    perl -pe "s/(\w+_\d+\.\d+)/\1|/g" > GCF_000001635.25_GRCm38.p5_rna.fa
+#
+#    # note that creat-virtref.pl is in this github repo github.com/jelber2/sage/
+#    ./create-virtref.pl
+#    # question 1's answer = paste name of directory housing GCF_000001635.25_GRCm38.p5_rna.fa
+#    # ex: /mnt/c/Users/ElbersJP/Desktop/old_sage_analysis_scripts/solid_sage_dianna
+#    # question 2's answer = 1
+#    # question 3's answer = ENTER
+#    # question 4's answer = ENTER
+#    # Proceed? [Y] = y
+#    # this creates a new 28.unique.all.virtual.tags.rec file in the folder:
+#    # ./solid_sage_diana/solid_sage_dianna-mRNA-28/GCF_000001635.25_GRCm38.p5_rna.fa/
+#    # the desired input for usearch -makeudb_usearch is: 28.unique.all.virtual.tags.rec
+## G.Barcode file format
 #    #note salbaum-barcodes.txt is in this format (minus the # and four leading spaces)
 #    CA N61M36BP70.fq
 #    CT N61M36CP70.fq
