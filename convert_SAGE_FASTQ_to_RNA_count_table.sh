@@ -3,7 +3,7 @@
 ###############################################################################
 # "convert_SAGE_FASTQ_to_RNA_count_table.sh"
 # created by: Jean P. Elbers
-# last modified: 29 June 2017, 11:46h
+# last modified: 2 August 2017, 12:16h
 ###############################################################################
 # Description
 #
