@@ -19,7 +19,7 @@
 # Step 5: Convert file of tags into FASTA format
 # Step 6: Dereplicates FASTA file and performs usearch_global
 # Step 7: Process usearch output, keeping only tags with matches
-#         of 25, 26, or 27 bases to the coding RNA virtual reference of 28 bp,
+#         of 25, 26, or 27 bases to the coding and non-coding RNA virtual references of 28 bp,
 #         gets rid of tags that match to more than one gene, uses the
 #         "size" information from the dereplicated FASTA to add that many counts
 #         for the particular tag, creates count table for each sample,
