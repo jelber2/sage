@@ -3,6 +3,13 @@
 ### To download enter the following command in a terminal window
     git clone https://github.com/jelber2/sage.git
     # this will create a folder called sage in the current directory
+    # you should see something like this in the terminal:
+    Cloning into 'sage'...
+    remote: Counting objects: 52, done.
+    remote: Compressing objects: 100% (3/3), done.
+    remote: Total 52 (delta 0), reused 1 (delta 0), pack-reused 49
+    Unpacking objects: 100% (52/52), done.
+    Checking connectivity... done.
 ### To update to the newest version,
 ### go to the directory housing the script
     # example:
@@ -35,10 +42,14 @@
     gettys-barcodes.txt             # name and path to the barcode file for Step 2: Demultiplexes
     demux.log                       # name for demultiplexing log for Step 2: Demultiplexes
     .fq                             # extension that you gave the demultiplexed fastq files from in Step 2
-    /home/jms/References_SAGE/SAGE28_ref.udb                        # location of coding RNA reference
-    /home/jms/References_SAGE/SAGE28_ncRNA_ref.udb          # location of non-coding RNA reference
+    SAGE28_ref.udb                        # location of coding RNA reference
+    SAGE28_ncRNA_nonencode_2016_ref.udb		# location of nonencode non-coding RNA reference
+    SAGE28_ncRNA_ncbi_ref.udb		# location of ncbi non-coding RNA reference
+    SAGE28_ncRNA_ensembl_ref.udb		# location of ensembl non-coding RNA reference
     coding-rna-count-table.txt      # name of coding RNA output count table
-    non-coding-rna-count-table.txt  # name of non-coding RNA output count table
+    nonencode-ncrna-count-table.txt	# name of nonencode non-coding RNA output count table
+    ncbi-ncrna-count-table.txt	# name of ncbi non-coding RNA output count table
+    ensembl-ncrna-count-table.txt	# name of ensembl non-coding RNA output count table
     /usr/local/bin/usearch          # location of usearch executable
 
     AND ANY ERRORS WOULD APPEAR HERE
@@ -55,3 +66,8 @@
     Starting Step 1: Concatenate reads
 ### If "n", then you will get
     Starting Step 3: FASTQ -> FASTA -> reverse complement
+### Output will be the following count tables:
+    coding-rna-count-table.txt
+    nonencode-ncrna-count-table.txt
+    ncbi-ncrna-count-table.txt
+    ensembl-ncrna-count-table.txt
