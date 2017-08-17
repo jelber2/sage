@@ -2,6 +2,7 @@
 ## script for converting Sage FASTQ files into coding and non-coding RNA count tables
 ### To download enter the following command in a terminal window
     git clone https://github.com/jelber2/sage.git
+    # this may take more than 10 minutes
     # this will create a folder called sage in the current directory
     # you should see something like this in the terminal:
     Cloning into 'sage'...
@@ -10,6 +11,13 @@
     remote: Total 52 (delta 0), reused 1 (delta 0), pack-reused 49
     Unpacking objects: 100% (52/52), done.
     Checking connectivity... done.
+## NOTE YOU MUST UNZIP THE SAGE REFS
+    cd /home/jms/sage/
+    unzip SAGE28_ncRNA_ensembl_ref.zip
+    unzip SAGE28_ncRNA_ncbi_ref.zip
+    unzip SAGE28_ncRNA_nonencode_2016_ref.zip
+    unzip SAGE28_ref_GCF_000001635.25_GRCm38.p5_NCBI_2017_07_20.zip
+    unzip SAGE28_ref.zip
 ### To update to the newest version,
 ### go to the directory housing the script
     # example:
@@ -71,3 +79,5 @@
     nonencode-ncrna-count-table.txt
     ncbi-ncrna-count-table.txt
     ensembl-ncrna-count-table.txt
+### Output will also be:
+    demux.log
