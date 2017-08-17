@@ -3,7 +3,7 @@
 ###############################################################################
 # "convert_SAGE_FASTQ_to_RNA_count_table.sh"
 # created by: Jean P. Elbers
-# last modified: 2 August 2017, 12:16h
+# last modified: 17 August 2017, 13:40h
 ###############################################################################
 # Description
 #
@@ -114,7 +114,7 @@
 #    ~/bin/usearch -makeudb_usearch 28.unique.all.virtual.tags.rec -output SAGE28_ref.udb
 #
 #    # note that you can update the virtual reference, following these steps (the old virtual reference was 
-#    # mm10/GRCm38.p1, newest version is mm10/GRCm38.p5
+#    # mm10/GRCm38.p1, newest version is mm10/GRCm38.p5)
 #
 #    wget ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/635/GCF_000001635.25_GRCm38.p5/GCF_000001635.25_GRCm38.p5_rna.fna.gz
 #    gunzip GCF_000001635.25_GRCm38.p5_rna.fna.gz
@@ -125,6 +125,9 @@
 #    perl -pe "s/(\w+_\d+\.\d+)/\1|/g" > GCF_000001635.25_GRCm38.p5_rna.fa
 #
 #    # note that creat-virtref.pl is in this github repo github.com/jelber2/sage/
+#    # to download: wget https://raw.githubusercontent.com/jelber2/sage/master/create-virtref.pl
+#    # you also need download solidsage.pm using: wget https://raw.githubusercontent.com/jelber2/sage/master/solidsage.pm
+#    # to use, type
 #    ./create-virtref.pl
 #    # question 1's answer = paste name of directory housing GCF_000001635.25_GRCm38.p5_rna.fa
 #    # ex: /mnt/c/Users/ElbersJP/Desktop/old_sage_analysis_scripts/solid_sage_dianna
@@ -179,6 +182,10 @@ else
     sed -n '11p' $1
     sed -n '12p' $1
     sed -n '13p' $1
+    sed -n '14p' $1
+    sed -n '15p' $1
+    sed -n '16p' $1
+    sed -n '17p' $1
     date_config=$(sed -n '2p' $1|perl -pe 's/\t.+//g')
     analyst_config=$(sed -n '3p' $1|perl -pe 's/\t.+//g')
     fq_gz_config=$(sed -n '4p' $1|perl -pe 's/\t.+//g')
@@ -187,10 +194,14 @@ else
     demux_config=$(sed -n '7p' $1|perl -pe 's/\t.+//g')
     fq_ext_config=$(sed -n '8p' $1|perl -pe 's/\t.+//g')
     rna_ref_config=$(sed -n '9p' $1|perl -pe 's/\t.+//g')
-    ncrna_ref_config=$(sed -n '10p' $1|perl -pe 's/\t.+//g')
-    rna_out_config=$(sed -n '11p' $1|perl -pe 's/\t.+//g')
-    ncrna_out_config=$(sed -n '12p' $1|perl -pe 's/\t.+//g')
-    usearch_config=$(sed -n '13p' $1|perl -pe 's/\t.+//g')
+    nonencode_ncrna_ref_config=$(sed -n '10p' $1|perl -pe 's/\t.+//g')
+    ncbi_ncrna_ref_config=$(sed -n '11p' $1|perl -pe 's/\t.+//g')
+    ensembl_ncrna_ref_config=$(sed -n '12p' $1|perl -pe 's/\t.+//g')
+    rna_out_config=$(sed -n '13p' $1|perl -pe 's/\t.+//g')
+    nonencode_ncrna_out_config=$(sed -n '14p' $1|perl -pe 's/\t.+//g')
+    ncbi_ncrna_out_config=$(sed -n '15p' $1|perl -pe 's/\t.+//g')
+    ensembl_ncrna_out_config=$(sed -n '16p' $1|perl -pe 's/\t.+//g')
+    usearch_config=$(sed -n '17p' $1|perl -pe 's/\t.+//g')
     if [ ! -f $barcodes_config ]
     then
         echo ''
@@ -311,7 +322,9 @@ else
             while read i;do
                 $usearch_config -fastx_uniques $i.fa.txt.fa -fastaout $i.derep.fa -sizeout
                 $usearch_config -usearch_global $i.derep.fa -db $rna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.out
-                $usearch_config -usearch_global $i.derep.fa -db $ncrna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.nc.out
+                $usearch_config -usearch_global $i.derep.fa -db $nonencode_ncrna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.nonencode.nc.out
+                $usearch_config -usearch_global $i.derep.fa -db $ncbi_ncrna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.ncbi.nc.out
+                $usearch_config -usearch_global $i.derep.fa -db $ensembl_ncrna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.ensembl.nc.out
                 echo "Done with sample $i"
                 echo ''
                 echo ''
@@ -337,14 +350,34 @@ else
             done < samples
             echo 'Processing non-coding RNA'
             while read i;do
-                awk -F"\t" '$6 == "25"||$6 == "26"||$6 == "27" {print $1"\t"$4}' $i.usearch.nc.out | \
+                awk -F"\t" '$6 == "25"||$6 == "26"||$6 == "27" {print $1"\t"$4}' $i.usearch.nonencode.nc.out | \
                 perl -pe "s/( )/\/\/\//g" | \
                 awk '{n = split($2, t, "///"); _2 = x
                 split(x, _)
                 for (i = 0; ++i <= n;)
                 _[t[i]]++ || _2 = _2 ? _2 "," t[i] : t[i]
                 $2 = _2
-                }-2' | grep -v "," | perl -pe "s/.+;size=(\d+);/\1/g" |sort -k 2,2 | sed "1i $i\tGene" > $i.usearch.nc.out.count
+                }-2' | grep -v "," | perl -pe "s/.+;size=(\d+);/\1/g" |sort -k 2,2 | sed "1i $i\tGene" > $i.usearch.nonencode.nc.out.count
+            done < samples
+            while read i;do
+                awk -F"\t" '$6 == "25"||$6 == "26"||$6 == "27" {print $1"\t"$4}' $i.usearch.ncbi.nc.out | \
+                perl -pe "s/( )/\/\/\//g" | \
+                awk '{n = split($2, t, "///"); _2 = x
+                split(x, _)
+                for (i = 0; ++i <= n;)
+                _[t[i]]++ || _2 = _2 ? _2 "," t[i] : t[i]
+                $2 = _2
+                }-2' | grep -v "," | perl -pe "s/.+;size=(\d+);/\1/g" |sort -k 2,2 | sed "1i $i\tGene" > $i.usearch.ncbi.nc.out.count
+            done < samples
+            while read i;do
+                awk -F"\t" '$6 == "25"||$6 == "26"||$6 == "27" {print $1"\t"$4}' $i.usearch.ensembl.nc.out | \
+                perl -pe "s/( )/\/\/\//g" | \
+                awk '{n = split($2, t, "///"); _2 = x
+                split(x, _)
+                for (i = 0; ++i <= n;)
+                _[t[i]]++ || _2 = _2 ? _2 "," t[i] : t[i]
+                $2 = _2
+                }-2' | grep -v "," | perl -pe "s/.+;size=(\d+);/\1/g" |sort -k 2,2 | sed "1i $i\tGene" > $i.usearch.ensembl.nc.out.count
             done < samples
             echo "Done with Step 7"
             echo ''
@@ -361,16 +394,36 @@ else
             Rscript make.count.table.R
             echo ''
             echo ''
-            echo 'Starting Step 8b:Make non-coding RNA count table'
-            echo "library(plyr)" > make.nc.count.table.R
-            echo "files <-list.files(pattern='.usearch.nc.out.count')" >> make.nc.count.table.R
-            echo "rawcounts <- list()" >> make.nc.count.table.R
-            echo "counts <- list()" >> make.nc.count.table.R
-            echo "for (i in 1:length(files)) {rawcounts[[i]] <- read.table(files[i],header=T)}" >> make.nc.count.table.R
-            echo "for (i in 1:length(files)) {counts[[i]] <- ddply(data.frame(rawcounts[i]),'Gene',numcolwise(sum))}" >> make.nc.count.table.R
-            echo "merged.data.frame = Reduce(function(...) merge(..., all=T), counts)" >> make.nc.count.table.R
-            echo "write.table(merged.data.frame, file='$ncrna_out_config',quote=F,sep='\t',eol='\r\n',na='0',row.names=F,col.names=T)" >> make.nc.count.table.R
-            Rscript make.nc.count.table.R
+            echo 'Starting Step 8b:Make nonencode non-coding RNA count table'
+            echo "library(plyr)" > make.nonencode.nc.count.table.R
+            echo "files <-list.files(pattern='.usearch.nonencode.nc.out.count')" >> make.nonencode.nc.count.table.R
+            echo "rawcounts <- list()" >> make.nonencode.nc.count.table.R
+            echo "counts <- list()" >> make.nonencode.nc.count.table.R
+            echo "for (i in 1:length(files)) {rawcounts[[i]] <- read.table(files[i],header=T)}" >> make.nonencode.nc.count.table.R
+            echo "for (i in 1:length(files)) {counts[[i]] <- ddply(data.frame(rawcounts[i]),'Gene',numcolwise(sum))}" >> make.nonencode.nc.count.table.R
+            echo "merged.data.frame = Reduce(function(...) merge(..., all=T), counts)" >> make.nonencode.nc.count.table.R
+            echo "write.table(merged.data.frame, file='$nonencode_ncrna_out_config',quote=F,sep='\t',eol='\r\n',na='0',row.names=F,col.names=T)" >> make.nonencode.nc.count.table.R
+            Rscript make.nonencode.nc.count.table.R
+            echo 'Starting Step 8c:Make ncbi non-coding RNA count table'
+            echo "library(plyr)" > make.ncbi.nc.count.table.R
+            echo "files <-list.files(pattern='.usearch.ncbi.nc.out.count')" >> make.ncbi.nc.count.table.R
+            echo "rawcounts <- list()" >> make.ncbi.nc.count.table.R
+            echo "counts <- list()" >> make.ncbi.nc.count.table.R
+            echo "for (i in 1:length(files)) {rawcounts[[i]] <- read.table(files[i],header=T)}" >> make.ncbi.nc.count.table.R
+            echo "for (i in 1:length(files)) {counts[[i]] <- ddply(data.frame(rawcounts[i]),'Gene',numcolwise(sum))}" >> make.ncbi.nc.count.table.R
+            echo "merged.data.frame = Reduce(function(...) merge(..., all=T), counts)" >> make.ncbi.nc.count.table.R
+            echo "write.table(merged.data.frame, file='$ncbi_ncrna_out_config',quote=F,sep='\t',eol='\r\n',na='0',row.names=F,col.names=T)" >> make.ncbi.nc.count.table.R
+            Rscript make.ncbi.nc.count.table.R
+            echo 'Starting Step 8d:Make ensembl non-coding RNA count table'
+            echo "library(plyr)" > make.ensembl.nc.count.table.R
+            echo "files <-list.files(pattern='.usearch.ensembl.nc.out.count')" >> make.ensembl.nc.count.table.R
+            echo "rawcounts <- list()" >> make.ensembl.nc.count.table.R
+            echo "counts <- list()" >> make.ensembl.nc.count.table.R
+            echo "for (i in 1:length(files)) {rawcounts[[i]] <- read.table(files[i],header=T)}" >> make.ensembl.nc.count.table.R
+            echo "for (i in 1:length(files)) {counts[[i]] <- ddply(data.frame(rawcounts[i]),'Gene',numcolwise(sum))}" >> make.ensembl.nc.count.table.R
+            echo "merged.data.frame = Reduce(function(...) merge(..., all=T), counts)" >> make.ensembl.nc.count.table.R
+            echo "write.table(merged.data.frame, file='$ensembl_ncrna_out_config',quote=F,sep='\t',eol='\r\n',na='0',row.names=F,col.names=T)" >> make.ensembl.nc.count.table.R
+            Rscript make.ensembl.nc.count.table.R
             echo "Done with Step 8"
             echo ''
             echo ''
@@ -384,11 +437,17 @@ else
                 rm $i.derep.fa
                 rm $i.usearch.out
                 rm $i.usearch.out.count
-                rm $i.usearch.nc.out
-                rm $i.usearch.nc.out.count
+                rm $i.usearch.nonencode.nc.out
+                rm $i.usearch.nonencode.nc.out.count
+                rm $i.usearch.ncbi.nc.out
+                rm $i.usearch.ncbi.nc.out.count
+                rm $i.usearch.ensembl.nc.out
+                rm $i.usearch.ensembl.nc.out.count
             done < samples
             rm make.count.table.R
-            rm make.nc.count.table.R
+            rm make.nonencode.nc.count.table.R
+            rm make.ncbi.nc.count.table.R
+            rm make.ensembl.nc.count.table.R
             rm samples
             echo ''
             echo 'Done with all steps'
