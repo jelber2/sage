@@ -274,7 +274,7 @@ else
                     echo ''
                     #Step 2
                     echo 'Starting Step 2: Demultiplex reads'
-                    ~/bin/sabre/sabre se -m 0 -f $cat_fq_config -b $barcodes_config -u /dev/null > $demux_config
+                    ~/bin/sabre/sabre se -m 0 -f $cat_fq_config -b $barcodes_config -u undemultiplexed.fq > $demux_config
                     cat $demux_config
                     echo "Done with Step 2"
                     echo ''
@@ -432,7 +432,6 @@ else
             rm $cat_fq_config
             while read i
             do
-                rm $i$fq_ext_config
                 rm $i.fa.txt.fa
                 rm $i.derep.fa
                 rm $i.usearch.out
