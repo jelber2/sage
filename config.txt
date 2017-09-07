@@ -1,17 +1,17 @@
-# config file for "script_for_converting_Illumina_SAGE_FASTQ_to_coding_or_non-coding_RNA_count_table_on_gcflinux-vm.pbrc.sh"
-17 August 2017			# Date
+# config file for "convert_SAGE_FASTQ_to_RNA_count_table.sh"
+7 September 2017			# Date
 Jean P. Elbers			# Analyst
 .fastq.gz			# extension of FASTQ files to demultiplex
-sage.fastq.gz			# name of concatenated FASTQ file for Step 1: Concatenates raw FASTQ 
-gettys-barcodes.txt		# name and path to the barcode file for Step 2: Demultiplexes
-demux.log			# name for demultiplexing log for Step 2: Demultiplexes
+sage_7Sep2017.fastq.gz			# name of concatenated FASTQ file for Step 1: Concatenates raw FASTQ 
+salbaum_barcodes_7Sep2017.txt		# name and path to the barcode file for Step 2: Demultiplexes
+sage_7Sep2017_demux.log			# name for demultiplexing log for Step 2: Demultiplexes
 .fq				# extension that you gave the demultiplexed fastq files from in Step 2
-SAGE28_ref.udb			# location of coding RNA reference
+SAGE28_ref_GCF_000001635.25_GRCm38.p5_NCBI_2017_07_20.udb			# location of coding RNA reference
 SAGE28_ncRNA_nonencode_2016_ref.udb		# location of nonencode non-coding RNA reference
 SAGE28_ncRNA_ncbi_ref.udb		# location of ncbi non-coding RNA reference
 SAGE28_ncRNA_ensembl_ref.udb		# location of ensembl non-coding RNA reference
-coding-rna-count-table.txt	# name of coding RNA output count table
-nonencode-ncrna-count-table.txt	# name of nonencode non-coding RNA output count table
-ncbi-ncrna-count-table.txt	# name of ncbi non-coding RNA output count table
-ensembl-ncrna-count-table.txt	# name of ensembl non-coding RNA output count table
+sage_7Sep2017_coding-rna-count-table.txt	# name of coding RNA output count table
+sage_7Sep2017_nonencode-ncrna-count-table.txt	# name of nonencode non-coding RNA output count table
+sage_7Sep2017_ncbi-ncrna-count-table.txt	# name of ncbi non-coding RNA output count table
+sage_7Sep2017_ensembl-ncrna-count-table.txt	# name of ensembl non-coding RNA output count table
 /home/gcf/bin/usearch		# location of usearch executable
