@@ -320,11 +320,11 @@ else
             #Step 6
             echo 'Starting Step 6: Dereplicates FASTA file and performs usearch_global on coding and non-coding RNA refereneces'
             while read i;do
-                $usearch_config -fastx_uniques $i.fa.txt.fa -fastaout $i.derep.fa -sizeout -threads 16
-                $usearch_config -usearch_global $i.derep.fa -db $rna_ref_config -id 1.0 -strand both -threads 16 -blast6out $i.usearch.out
-                $usearch_config -usearch_global $i.derep.fa -db $nonencode_ncrna_ref_config -id 1.0 -strand both -threads 16 -blast6out $i.usearch.nonencode.nc.out
-                $usearch_config -usearch_global $i.derep.fa -db $ncbi_ncrna_ref_config -id 1.0 -strand both -threads 16 -blast6out $i.usearch.ncbi.nc.out
-                $usearch_config -usearch_global $i.derep.fa -db $ensembl_ncrna_ref_config -id 1.0 -strand both -threads 16 -blast6out $i.usearch.ensembl.nc.out
+                $usearch_config -fastx_uniques $i.fa.txt.fa -fastaout $i.derep.fa -sizeout -threads 32
+                $usearch_config -usearch_global $i.derep.fa -db $rna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.out
+                $usearch_config -usearch_global $i.derep.fa -db $nonencode_ncrna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.nonencode.nc.out
+                $usearch_config -usearch_global $i.derep.fa -db $ncbi_ncrna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.ncbi.nc.out
+                $usearch_config -usearch_global $i.derep.fa -db $ensembl_ncrna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.ensembl.nc.out
                 echo "Done with sample $i"
                 echo ''
                 echo ''
