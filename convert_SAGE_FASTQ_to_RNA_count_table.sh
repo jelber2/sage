@@ -50,7 +50,7 @@
 #    wget https://raw.githubusercontent.com/lh3/seqtk/32e7903e8fd36cf8975a05295156cc69ca57c82b/seqtk.c
 #    make
 #    # commit/version is 32e7903e8fd36cf8975a05295156cc69ca57c82b
-# C.Get and install sabre
+# C1.Get and install sabre
 #    cd ~/bin/
 #    mkdir sabre
 #    cd sabre/
@@ -66,7 +66,12 @@
 #    cd ..
 #    make
 #    # commit/version is 039a55e500ba07b7e6432ea6ec2ddcfb3471d949
-#
+# C2.Get and install pigz
+#    cd ~/bin/
+#    wget https://zlib.net/pigz/pigz-2.3.4.tar.gz
+#    tar xzf pigz-2.3.4.tar.gz
+#    cd pigz-2.3.4
+#    make
 # D.Get and install Parallel
 #    cd ~/bin/
 #    wget http://ftp.gnu.org/gnu/parallel/parallel-20130922.tar.bz2
@@ -430,10 +435,10 @@ else
             #Step 9
             echo "Step 9: Remove or compress intermediate files"
             rm $cat_fq_config
-            gzip undemultiplexed.fastq
+            ~/bin/pigz-2.3.4/pigz undemultiplexed.fastq
             while read i
             do
-                gzip $i$fq_ext_config
+                ~/bin/pigz-2.3.4/pigz $i$fq_ext_config
                 rm $i.fa.txt.fa
                 rm $i.derep.fa
                 rm $i.usearch.out
