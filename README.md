@@ -17,6 +17,8 @@
     unzip SAGE28_ncRNA_ncbi_ref.zip
     unzip SAGE28_ncRNA_nonencode_2016_ref.zip
     unzip SAGE28_ref_GCF_000001635.25_GRCm38.p5_NCBI_2017_07_20.zip
+## You must also delete the example FASTQ.GZ files if you copied the FASTQ files for analysis on the current experiment
+    rm ?.fastq.gz
 ### To update to the newest version,
 ### go to the directory housing the script
     # example:
