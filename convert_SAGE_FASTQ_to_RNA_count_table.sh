@@ -338,7 +338,7 @@ else
             echo ''
             echo 'Processing coding RNA'
             while read i;do
-                awk -F"\t" '$4 == "25"||$4 == "26"||$4 == "27" {print $1"\t"$2}' $i.usearch.out | \
+                $ref_age
                 perl -pe "s/\w+ (.+)/\1/" | \
                 perl -pe "s/( )/\/\/\//g" | \
                 awk '{n = split($2, t, "///"); _2 = x
