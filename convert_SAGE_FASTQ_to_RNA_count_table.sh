@@ -274,7 +274,7 @@ else
                     echo ''
                     #Step 2
                     echo 'Starting Step 2: Demultiplex reads'
-                    ~/bin/sabre/sabre se -m 0 -f $cat_fq_config -b $barcodes_config -u undemultiplexed.fq > $demux_config
+                    ~/bin/sabre/sabre se -m 0 -f $cat_fq_config -b $barcodes_config -u undemultiplexed.fastq > $demux_config
                     cat $demux_config
                     echo "Done with Step 2"
                     echo ''
@@ -320,11 +320,11 @@ else
             #Step 6
             echo 'Starting Step 6: Dereplicates FASTA file and performs usearch_global on coding and non-coding RNA refereneces'
             while read i;do
-                $usearch_config -fastx_uniques $i.fa.txt.fa -fastaout $i.derep.fa -sizeout
-                $usearch_config -usearch_global $i.derep.fa -db $rna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.out
-                $usearch_config -usearch_global $i.derep.fa -db $nonencode_ncrna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.nonencode.nc.out
-                $usearch_config -usearch_global $i.derep.fa -db $ncbi_ncrna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.ncbi.nc.out
-                $usearch_config -usearch_global $i.derep.fa -db $ensembl_ncrna_ref_config -id 1.0 -strand both -threads 32 -blast6out $i.usearch.ensembl.nc.out
+                $usearch_config -fastx_uniques $i.fa.txt.fa -fastaout $i.derep.fa -sizeout -threads 16
+                $usearch_config -usearch_global $i.derep.fa -db $rna_ref_config -id 1.0 -strand both -threads 16 -blast6out $i.usearch.out
+                $usearch_config -usearch_global $i.derep.fa -db $nonencode_ncrna_ref_config -id 1.0 -strand both -threads 16 -blast6out $i.usearch.nonencode.nc.out
+                $usearch_config -usearch_global $i.derep.fa -db $ncbi_ncrna_ref_config -id 1.0 -strand both -threads 16 -blast6out $i.usearch.ncbi.nc.out
+                $usearch_config -usearch_global $i.derep.fa -db $ensembl_ncrna_ref_config -id 1.0 -strand both -threads 16 -blast6out $i.usearch.ensembl.nc.out
                 echo "Done with sample $i"
                 echo ''
                 echo ''
@@ -338,7 +338,7 @@ else
             echo ''
             echo 'Processing coding RNA'
             while read i;do
-                awk -F"\t" '$4 == "25"||$4 == "26"||$4 == "27" {print $1"\t"$2}' $i.usearch.out | \
+                awk -F"\t" '$6 == "25"||$6 == "26"||$6 == "27" {print $1"\t"$4}' $i.usearch.out | \
                 perl -pe "s/\w+ (.+)/\1/" | \
                 perl -pe "s/( )/\/\/\//g" | \
                 awk '{n = split($2, t, "///"); _2 = x
@@ -428,10 +428,12 @@ else
             echo ''
             echo ''
             #Step 9
-            echo "Step 9: Remove intermediate files"
+            echo "Step 9: Remove or compress intermediate files"
             rm $cat_fq_config
+            gzip undemultiplexed.fastq
             while read i
             do
+                gzip $i$fq_ext_config
                 rm $i.fa.txt.fa
                 rm $i.derep.fa
                 rm $i.usearch.out
