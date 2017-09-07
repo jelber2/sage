@@ -17,7 +17,6 @@
     unzip SAGE28_ncRNA_ncbi_ref.zip
     unzip SAGE28_ncRNA_nonencode_2016_ref.zip
     unzip SAGE28_ref_GCF_000001635.25_GRCm38.p5_NCBI_2017_07_20.zip
-    unzip SAGE28_ref.zip
 ### To update to the newest version,
 ### go to the directory housing the script
     # example:
@@ -50,7 +49,7 @@
     gettys-barcodes.txt             # name and path to the barcode file for Step 2: Demultiplexes
     demux.log                       # name for demultiplexing log for Step 2: Demultiplexes
     .fq                             # extension that you gave the demultiplexed fastq files from in Step 2
-    SAGE28_ref.udb                        # location of coding RNA reference
+    SAGE28_ref_GCF_000001635.25_GRCm38.p5_NCBI_2017_07_20.udb                        # location of coding RNA reference
     SAGE28_ncRNA_nonencode_2016_ref.udb		# location of nonencode non-coding RNA reference
     SAGE28_ncRNA_ncbi_ref.udb		# location of ncbi non-coding RNA reference
     SAGE28_ncRNA_ensembl_ref.udb		# location of ensembl non-coding RNA reference
@@ -81,3 +80,7 @@
     ensembl-ncrna-count-table.txt
 ### Output will also be:
     demux.log
+    undemultiplexed.fastq.gz
+    sample1.fq.gz
+    sample2.fq.gz
+    sampleN.fq.gz
