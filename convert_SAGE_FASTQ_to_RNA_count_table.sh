@@ -35,13 +35,13 @@
 ###############################################################################
 # Prerequisites
 # Remove "#" comments to copy and paste code into a Linux terminal
-# A.Setup ~/bin/ directory
+# A.Setup /home/jms/bin/ directory
 #    # after logging into gcflinux-vm1.pbrc.edu
 #    pwd
 #    # should be /home/jms/
 #    mkdir bin
 # B.Get and install seqtk
-#    cd ~/bin/
+#    cd /home/jms/bin/
 #    mkdir seqtk
 #    cd seqtk
 #    wget https://raw.githubusercontent.com/lh3/seqtk/32e7903e8fd36cf8975a05295156cc69ca57c82b/Makefile
@@ -51,7 +51,7 @@
 #    make
 #    # commit/version is 32e7903e8fd36cf8975a05295156cc69ca57c82b
 # C1.Get and install sabre
-#    cd ~/bin/
+#    cd /home/jms/bin/
 #    mkdir sabre
 #    cd sabre/
 #    wget https://raw.githubusercontent.com/najoshi/sabre/master/Makefile
@@ -67,13 +67,13 @@
 #    make
 #    # commit/version is 039a55e500ba07b7e6432ea6ec2ddcfb3471d949
 # C2.Get and install pigz
-#    cd ~/bin/
+#    cd /home/jms/bin/
 #    wget https://zlib.net/pigz/pigz-2.3.4.tar.gz
 #    tar xzf pigz-2.3.4.tar.gz
 #    cd pigz-2.3.4
 #    make
 # D.Get and install Parallel
-#    cd ~/bin/
+#    cd /home/jms/bin/
 #    wget http://ftp.gnu.org/gnu/parallel/parallel-20130922.tar.bz2
 #    tar xjf parallel-20130922.tar.bz2
 #    cd parallel-20130922/
@@ -113,10 +113,10 @@
 #    # non-coding RNA reference
 #    # create non-coding RNA reference from (Y for QNAP) Y:\REFERENCES\Nonencode references\ncRNA_mm10\VirtualReference\ncRNAmm-mRNA-CATG-28\NONCODE2016_mouse.fa\28.unique.all.virtual.tags.rec
 #    # 28.unique.all.virtual.tags.rec renamed to ncRNA_28.unique.all.virtual.tags
-#    ~/bin/usearch -makeudb_usearch ncRNA_28.unique.all.virtual.tags -output SAGE28_ncRNA_ref.udb
+#    /home/jms/bin/usearch -makeudb_usearch ncRNA_28.unique.all.virtual.tags -output SAGE28_ncRNA_ref.udb
 #    # coding RNA reference
 #    # R:\solid\GCF\solidsageReferences\mm10\GRCm38.p1\VirtualReference\GRCm38.p1-mRNA-CATG-28\28.unique.all.virtual.tags.rec
-#    ~/bin/usearch -makeudb_usearch 28.unique.all.virtual.tags.rec -output SAGE28_ref.udb
+#    /home/jms/bin/usearch -makeudb_usearch 28.unique.all.virtual.tags.rec -output SAGE28_ref.udb
 #
 #    # note that you can update the virtual reference, following these steps (the old virtual reference was 
 #    # mm10/GRCm38.p1, newest version is mm10/GRCm38.p5)
@@ -279,7 +279,7 @@ else
                     echo ''
                     #Step 2
                     echo 'Starting Step 2: Demultiplex reads'
-                    ~/bin/sabre/sabre se -m 0 -f $cat_fq_config -b $barcodes_config -u undemultiplexed.fastq > $demux_config
+                    /home/jms/bin/sabre/sabre se -m 0 -f $cat_fq_config -b $barcodes_config -u undemultiplexed.fastq > $demux_config
                     cat $demux_config
                     echo "Done with Step 2"
                     echo ''
@@ -301,13 +301,13 @@ else
             #Step 3
             echo 'Starting Step 3: FASTQ -> FASTA -> reverse complement'
             ls *.fq | perl -pe "s/.fq//g" > samples
-            ~/bin/parallel-20130922/src/parallel '~/bin/seqtk/seqtk seq -a {} | ~/bin/seqtk/seqtk seq -r > {.}.rc' ::: *$fq_ext_config
+            /home/jms/bin/parallel-20130922/src/parallel '/home/jms/bin/seqtk/seqtk seq -a {} | /home/jms/bin/seqtk/seqtk seq -r > {.}.rc' ::: *$fq_ext_config
             echo "Done with Step 3"
             echo ''
             echo ''
             #Step 4
             echo 'Starting Step 4: Get tags starting with CATG followed by 21 to 23 bases'
-           ~/bin/parallel-20130922/src/parallel 'grep -Po "CATG\w{21,23}" {} > {.}.fa.txt && rm {}' ::: *.rc
+           /home/jms/bin/parallel-20130922/src/parallel 'grep -Po "CATG\w{21,23}" {} > {.}.fa.txt && rm {}' ::: *.rc
             echo "Done with Step 4"
             echo ''
             echo ''
@@ -435,10 +435,10 @@ else
             #Step 9
             echo "Step 9: Remove or compress intermediate files"
             rm $cat_fq_config
-            ~/bin/pigz-2.3.4/pigz undemultiplexed.fastq
+            /home/jms/bin/pigz-2.3.4/pigz undemultiplexed.fastq
             while read i
             do
-                ~/bin/pigz-2.3.4/pigz $i$fq_ext_config
+                /home/jms/bin/pigz-2.3.4/pigz $i$fq_ext_config
                 rm $i.fa.txt.fa
                 rm $i.derep.fa
                 rm $i.usearch.out
